@@ -1,0 +1,6 @@
+C:\Users\Tomáš\Desktop\cs_projects\FFT\bin\Debug\FFT.exe.config
+C:\Users\Tomáš\Desktop\cs_projects\FFT\bin\Debug\FFT.exe
+C:\Users\Tomáš\Desktop\cs_projects\FFT\bin\Debug\FFT.pdb
+C:\Users\Tomáš\Desktop\cs_projects\FFT\obj\Debug\FFT.csprojResolveAssemblyReference.cache
+C:\Users\Tomáš\Desktop\cs_projects\FFT\obj\Debug\FFT.exe
+C:\Users\Tomáš\Desktop\cs_projects\FFT\obj\Debug\FFT.pdb
