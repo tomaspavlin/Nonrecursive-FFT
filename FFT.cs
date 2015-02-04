@@ -7,18 +7,15 @@ using System.Numerics;
 
 namespace FFT {
     public class FFT {
-        public static Polynom NonrecursiveFFT(Polynom p){
-            return NonrecursiveFFT(p.ComplementWithNulls(),false);
-        }
         /// <summary>
         /// 
         /// </summary>
         /// <param name="p">Polynom. Must have pow of 2 member. Maybe you can use .ComplementWithNulls()</param>
         /// <param name="reversed">If true, the method will make reversed FFT (interpolation)</param>
         /// <returns></returns>
-        public static Polynom NonrecursiveFFT(Polynom p,bool reversed) {
+        public static Polynom NonrecursiveFFT(Polynom p, bool reversed = false) {
             int layersCount = (int) Math.Ceiling(Math.Log(p.Count,2));
-            if (Math.Pow(2, layersCount) != p.Count) throw new ArgumentException("Polynom must have pow of 2 members. Maybe you want to use .ComplementWithNulls() methdo.");
+            if (1 << layersCount != p.Count) throw new ArgumentException("Polynom must have pow of 2 members. Maybe you want to use .ComplementWithNulls() methdo.");
 
             //Permuts coefficients of p so they would suit the coefficients in the last layer of FFT
             Polynom new_p = new Polynom(p.Count);
@@ -39,7 +36,7 @@ namespace FFT {
             p = new_p;
 
             for (int layer = 1; layer <= layersCount; layer++) { //
-                int nodeSize = (int)Math.Round(Math.Pow(2, layer));
+                int nodeSize = 1 << layer;
                 int nodeCount = p.Count / nodeSize; //division is integer
 
                 Complex omega = ComplexUtils.GetSqrtOfOne(nodeSize);
@@ -187,8 +184,54 @@ namespace FFT {
             ret.Trim();
             return ret;
         }
+        /// <summary>
+        /// Multiple a and b by convolution
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static Polynom MulByConvolution(Polynom a, Polynom b) {
+            Polynom ret = new Polynom();
+
+            for (int i = 0; i < a.Count + b.Count - 1; i++) { //i index of ret
+                Complex c = 0;
+                for (int ii = 0; ii <= i; ii++) {
+                    if (ii >= a.Count) continue;
+                    if ((i - ii) >= b.Count) continue;
+
+                    c += a[ii] * b[i - ii];
+                }
+                ret.Add(c);
+
+            }
+            ret.Trim();
+            return ret;
+        }
+        public static bool AreAlmostEquival(Polynom p, Polynom q, bool output = false) {
+            p = p.Clone();
+            q = q.Clone();
+            p.Trim();
+            q.Trim();
+
+            if (p.Count != q.Count) {
+                if(output)
+                    Console.WriteLine("p.Count: {0},\nq.Count: {1}\n",p.Count,q.Count);
+                return false;
+            }
+            for (int i = 0; i < p.Count; i++) {
+                if (!ComplexUtils.IsAlmostEqual(p[i], q[i])) {
+                    if (output)
+                        Console.WriteLine("p[i]: {0},\nq[i]: {1},\ni: {2}\n", p[i], q[i], i);
+                    return false;
+
+                }
+            }
+
+            return true;
+        }
     }
     public static class ComplexUtils {
+        private const int digitsNumber = 7;
         public static Complex GetSqrtOfOne(int n) {
             return Complex.Exp((2 * Math.PI * Complex.ImaginaryOne) / n);
         }
@@ -196,8 +239,8 @@ namespace FFT {
             return RoundComplex(c) == RoundComplex(c2);
         }
         public static Complex RoundComplex(Complex c) {
-            double r = Math.Round(c.Real, 10);
-            double im = Math.Round(c.Imaginary, 10);
+            double r = Math.Round(c.Real, digitsNumber);
+            double im = Math.Round(c.Imaginary, digitsNumber);
             return new Complex(r, im);
         }
         public static string ToNiceString(Complex c) {
